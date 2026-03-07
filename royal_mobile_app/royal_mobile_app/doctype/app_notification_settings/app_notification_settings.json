@@ -1,0 +1,132 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2025-08-03 14:44:11.649946",
+    "default_view": "List",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "sms_enabled",
+        "column_break_uqm1s",
+        "push_enabled",
+        "sms_settings_section",
+        "sms_api_url",
+        "sms_api_key",
+        "sms_api_password",
+        "sms_sender_id",
+        "sms_test_number",
+        "cb_sms",
+        "sms_character_limit",
+        "fcm_section",
+        "fcm_api_url",
+        "fcm_configurations"
+    ],
+    "fields": [
+        {
+            "depends_on": "eval:doc.sms_enabled",
+            "fieldname": "sms_settings_section",
+            "fieldtype": "Section Break",
+            "label": "SMS Settings"
+        },
+        {
+            "fieldname": "sms_api_url",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "SMS API URL",
+            "reqd": 1
+        },
+        {
+            "fieldname": "sms_api_key",
+            "fieldtype": "Password",
+            "label": "SMS API KEY",
+            "reqd": 1
+        },
+        {
+            "fieldname": "sms_sender_id",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Sender ID",
+            "reqd": 1
+        },
+        {
+            "fieldname": "sms_test_number",
+            "fieldtype": "Data",
+            "label": "Test Phone Number"
+        },
+        {
+            "fieldname": "cb_sms",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "1",
+            "fieldname": "sms_enabled",
+            "fieldtype": "Check",
+            "label": "Enable SMS Notifications"
+        },
+        {
+            "default": "150",
+            "fieldname": "sms_character_limit",
+            "fieldtype": "Int",
+            "label": "Character Limit"
+        },
+        {
+            "depends_on": "eval:doc.push_enabled",
+            "fieldname": "fcm_section",
+            "fieldtype": "Section Break",
+            "label": "FCM Push Notification Settings"
+        },
+        {
+            "default": "https://fcm.googleapis.com/fcm/send",
+            "fieldname": "fcm_api_url",
+            "fieldtype": "Data",
+            "label": "FCM API URL"
+        },
+        {
+            "default": "1",
+            "fieldname": "push_enabled",
+            "fieldtype": "Check",
+            "label": "Enable Push Notifications"
+        },
+        {
+            "fieldname": "fcm_configurations",
+            "fieldtype": "Table",
+            "label": "FCM App Configurations",
+            "options": "FCM App Configuration"
+        },
+        {
+            "fieldname": "sms_api_password",
+            "fieldtype": "Password",
+            "in_list_view": 1,
+            "label": "SMS API Password",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_uqm1s",
+            "fieldtype": "Column Break"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "issingle": 1,
+    "links": [],
+    "modified": "2025-08-03 16:31:04.557771",
+    "modified_by": "Administrator",
+    "module": "Royal Mobile App",
+    "name": "App Notification Settings",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

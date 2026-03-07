@@ -1,0 +1,164 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "format:PFB-{YYYY}{MM}-{#####}",
+    "creation": "2025-07-09 12:48:50.036928",
+    "default_view": "List",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "patient",
+        "patient_name",
+        "cb_contact_info",
+        "feedback_type",
+        "rating",
+        "feedback_details_section",
+        "comments",
+        "app_feedback_details_section",
+        "app_feedback_category",
+        "cb_app_columns_column",
+        "app_version",
+        "device_info",
+        "administrative_section",
+        "status"
+    ],
+    "fields": [
+        {
+            "allow_in_quick_entry": 1,
+            "fieldname": "patient",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Patient",
+            "options": "Patient",
+            "reqd": 1
+        },
+        {
+            "fieldname": "comments",
+            "fieldtype": "Text",
+            "in_list_view": 1,
+            "label": "Comments",
+            "reqd": 1
+        },
+        {
+            "fetch_from": "patient.first_name",
+            "fieldname": "patient_name",
+            "fieldtype": "Read Only",
+            "label": "Patient Name"
+        },
+        {
+            "allow_in_quick_entry": 1,
+            "fieldname": "feedback_type",
+            "fieldtype": "Select",
+            "in_filter": 1,
+            "in_global_search": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Feedback Type",
+            "options": "General Feedback\nDoctor Feedback\nFacility Feedback\nAppointment Feedback\nService Feedback\nApp Related Feedback",
+            "reqd": 1
+        },
+        {
+            "depends_on": "eval:doc.feedback_type == 'App Related Feedback'",
+            "fieldname": "app_feedback_category",
+            "fieldtype": "Select",
+            "in_filter": 1,
+            "in_global_search": 1,
+            "in_standard_filter": 1,
+            "label": "App Feedback Category",
+            "options": "UI/UX\nPerformance\nBug Report\nFeature Request\nNavigation\nOther"
+        },
+        {
+            "allow_in_quick_entry": 1,
+            "default": "5",
+            "fieldname": "rating",
+            "fieldtype": "Float",
+            "in_filter": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Rating",
+            "precision": "1",
+            "reqd": 1
+        },
+        {
+            "depends_on": "eval:doc.feedback_type == 'App Related Feedback'",
+            "fieldname": "app_version",
+            "fieldtype": "Data",
+            "label": "App Version"
+        },
+        {
+            "fieldname": "cb_contact_info",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "feedback_details_section",
+            "fieldtype": "Section Break",
+            "label": "Feedback Details"
+        },
+        {
+            "fieldname": "app_feedback_details_section",
+            "fieldtype": "Section Break",
+            "label": "App Feedback Details"
+        },
+        {
+            "fieldname": "cb_app_columns_column",
+            "fieldtype": "Column Break"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "administrative_section",
+            "fieldtype": "Section Break",
+            "label": "Administrative"
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "label": "Status",
+            "options": "Open\nProgress\nResolved\nRejected"
+        },
+        {
+            "depends_on": "eval:doc.feedback_type == 'App Related Feedback'",
+            "fieldname": "device_info",
+            "fieldtype": "Data",
+            "label": "Device Info"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2025-08-04 15:37:08.652099",
+    "modified_by": "Administrator",
+    "module": "Royal Mobile App",
+    "name": "Patient Feedback",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "All",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

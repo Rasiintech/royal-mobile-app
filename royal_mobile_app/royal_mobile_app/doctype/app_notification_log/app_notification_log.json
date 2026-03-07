@@ -1,0 +1,220 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-03 14:47:22.553372",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "app_target",
+  "type",
+  "category",
+  "recipient_type",
+  "user",
+  "patient",
+  "selected_users",
+  "selected_patients",
+  "subject",
+  "title",
+  "message",
+  "click_action",
+  "status",
+  "api_response",
+  "section_break_ihfhn",
+  "image_url",
+  "image_colum",
+  "image_file",
+  "reference_section",
+  "reference_doctype",
+  "reference_name",
+  "timing_section",
+  "sent_on",
+  "delivered_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "SMS\nPush Notification",
+   "reqd": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Appointment\nPayment\nAlert\nPromotion"
+  },
+  {
+   "depends_on": "eval:doc.type == \"SMS\"",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Subject",
+   "mandatory_depends_on": "eval:doc.type == \"SMS\""
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Text Editor",
+   "label": "Message Content",
+   "reqd": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nSent\nFailed\nDelivered"
+  },
+  {
+   "fieldname": "api_response",
+   "fieldtype": "JSON",
+   "label": "API Response",
+   "options": "JSON",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "timing_section",
+   "fieldtype": "Section Break",
+   "label": "Timing"
+  },
+  {
+   "default": "Today",
+   "fieldname": "sent_on",
+   "fieldtype": "Date",
+   "label": "Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_on",
+   "fieldtype": "Date",
+   "label": "Delivered On",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.type == \"Push Notification\"",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "mandatory_depends_on": "eval:doc.type == \"Push Notification\""
+  },
+  {
+   "depends_on": "eval:doc.type == \"Push Notification\"",
+   "fieldname": "image_url",
+   "fieldtype": "Data",
+   "label": "Image Url"
+  },
+  {
+   "depends_on": "eval:doc.type == \"Push Notification\"",
+   "fieldname": "click_action",
+   "fieldtype": "Data",
+   "label": "Click Action"
+  },
+  {
+   "fieldname": "image_colum",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.type == \"Push Notification\"",
+   "fieldname": "image_file",
+   "fieldtype": "Attach Image",
+   "label": "Image File"
+  },
+  {
+   "fieldname": "recipient_type",
+   "fieldtype": "Select",
+   "label": "Recipient Type",
+   "options": "Single User\nSingle Patient\nMultiple Users\nMultiple Patients\nAll Users\nAll Patients"
+  },
+  {
+   "depends_on": "eval:doc.recipient_type == 'Multiple Users'",
+   "fieldname": "selected_users",
+   "fieldtype": "Table",
+   "label": "Selected Users",
+   "mandatory_depends_on": "eval:doc.recipient_type == 'Multiple Users'",
+   "options": "User Selection Row"
+  },
+  {
+   "fieldname": "app_target",
+   "fieldtype": "Select",
+   "label": "Target App",
+   "options": "Royal Mobile App\nHaldoor App",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.recipient_type == 'Multiple Patients'",
+   "fieldname": "selected_patients",
+   "fieldtype": "Table",
+   "label": "Selected Patients",
+   "mandatory_depends_on": "eval:doc.recipient_type == 'Multiple Patients'",
+   "options": "Patient Selection Row"
+  },
+  {
+   "depends_on": "eval:doc.recipient_type == 'Single User'",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "mandatory_depends_on": "eval:doc.recipient_type == 'Single User'",
+   "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.recipient_type == 'Single Patient'",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "mandatory_depends_on": "eval:doc.recipient_type == 'Single Patient'",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "section_break_ihfhn",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-04 12:07:17.901646",
+ "modified_by": "Administrator",
+ "module": "Royal Mobile App",
+ "name": "App Notification Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,43 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2025-08-03 17:32:02.490158",
+    "default_view": "List",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "patient",
+        "patient_name"
+    ],
+    "fields": [
+        {
+            "fieldname": "patient",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Patient",
+            "options": "Patient",
+            "reqd": 1
+        },
+        {
+            "fetch_from": "patient.first_name",
+            "fieldname": "patient_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Patient Name ",
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2025-08-03 21:11:30.759952",
+    "modified_by": "Administrator",
+    "module": "Royal Mobile App",
+    "name": "Patient Selection Row",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

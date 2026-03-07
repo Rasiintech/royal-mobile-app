@@ -5,28 +5,17 @@ app_description = "Royal Mobile App"
 app_email = "rasiintech@gmail.com"
 app_license = "mit"
 
-# Apps
-# ------------------
-
-# required_apps = []
-
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "royal_mobile_app",
-# 		"logo": "/assets/royal_mobile_app/logo.png",
-# 		"title": "Royal Mobile App",
-# 		"route": "/royal_mobile_app",
-# 		"has_permission": "royal_mobile_app.api.permission.has_app_permission"
-# 	}
-# ]
-
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/royal_mobile_app/css/royal_mobile_app.css"
 # app_include_js = "/assets/royal_mobile_app/js/royal_mobile_app.js"
+
+app_include_js = [
+    "/assets/royal_mobile_app/js/patient_feedback_sidebar.js"
+]
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/royal_mobile_app/css/royal_mobile_app.css"
@@ -48,11 +37,6 @@ app_license = "mit"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-# Svg Icons
-# ------------------
-# include app icons in desk
-# app_include_icons = "royal_mobile_app/public/icons.svg"
-
 # Home Pages
 # ----------
 
@@ -61,7 +45,7 @@ app_license = "mit"
 
 # website user home page (by Role)
 # role_home_page = {
-# 	"Role": "home_page"
+#	"Role": "home_page"
 # }
 
 # Generators
@@ -75,8 +59,8 @@ app_license = "mit"
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "royal_mobile_app.utils.jinja_methods",
-# 	"filters": "royal_mobile_app.utils.jinja_filters"
+#	"methods": "royal_mobile_app.utils.jinja_methods",
+#	"filters": "royal_mobile_app.utils.jinja_filters"
 # }
 
 # Installation
@@ -91,22 +75,6 @@ app_license = "mit"
 # before_uninstall = "royal_mobile_app.uninstall.before_uninstall"
 # after_uninstall = "royal_mobile_app.uninstall.after_uninstall"
 
-# Integration Setup
-# ------------------
-# To set up dependencies/integrations with other apps
-# Name of the app being installed is passed as an argument
-
-# before_app_install = "royal_mobile_app.utils.before_app_install"
-# after_app_install = "royal_mobile_app.utils.after_app_install"
-
-# Integration Cleanup
-# -------------------
-# To clean up dependencies/integrations with other apps
-# Name of the app being uninstalled is passed as an argument
-
-# before_app_uninstall = "royal_mobile_app.utils.before_app_uninstall"
-# after_app_uninstall = "royal_mobile_app.utils.after_app_uninstall"
-
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
@@ -118,11 +86,11 @@ app_license = "mit"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+#	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -130,7 +98,7 @@ app_license = "mit"
 # Override standard doctype classes
 
 # override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
+#	"ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -138,32 +106,32 @@ app_license = "mit"
 # Hook on document methods and events
 
 # doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
+#	"*": {
+#		"on_update": "method",
+#		"on_cancel": "method",
+#		"on_trash": "method"
+#	}
 # }
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
-# 	"all": [
-# 		"royal_mobile_app.tasks.all"
-# 	],
-# 	"daily": [
-# 		"royal_mobile_app.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"royal_mobile_app.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"royal_mobile_app.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"royal_mobile_app.tasks.monthly"
-# 	],
+#	"all": [
+#		"royal_mobile_app.tasks.all"
+#	],
+#	"daily": [
+#		"royal_mobile_app.tasks.daily"
+#	],
+#	"hourly": [
+#		"royal_mobile_app.tasks.hourly"
+#	],
+#	"weekly": [
+#		"royal_mobile_app.tasks.weekly"
+#	],
+#	"monthly": [
+#		"royal_mobile_app.tasks.monthly"
+#	],
 # }
 
 # Testing
@@ -175,14 +143,14 @@ app_license = "mit"
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "royal_mobile_app.event.get_events"
+#	"frappe.desk.doctype.event.event.get_events": "royal_mobile_app.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "royal_mobile_app.task.get_dashboard_data"
+#	"Task": "royal_mobile_app.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -208,42 +176,40 @@ app_license = "mit"
 # --------------------
 
 # user_data_fields = [
-# 	{
-# 		"doctype": "{doctype_1}",
-# 		"filter_by": "{filter_by}",
-# 		"redact_fields": ["{field_1}", "{field_2}"],
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_2}",
-# 		"filter_by": "{filter_by}",
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_3}",
-# 		"strict": False,
-# 	},
-# 	{
-# 		"doctype": "{doctype_4}"
-# 	}
+#	{
+#		"doctype": "{doctype_1}",
+#		"filter_by": "{filter_by}",
+#		"redact_fields": ["{field_1}", "{field_2}"],
+#		"partial": 1,
+#	},
+#	{
+#		"doctype": "{doctype_2}",
+#		"filter_by": "{filter_by}",
+#		"partial": 1,
+#	},
+#	{
+#		"doctype": "{doctype_3}",
+#		"strict": False,
+#	},
+#	{
+#		"doctype": "{doctype_4}"
+#	}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-# 	"royal_mobile_app.auth.validate"
+#	"royal_mobile_app.auth.validate"
 # ]
 
-# Automatically update python controller files with type annotations for this app.
-# export_python_type_annotations = True
 
-# default_log_clearing_doctypes = {
-# 	"Logging DocType Name": 30  # days to retain logs
-# }
-
-# Translation
-# ------------
-# List of apps whose translatable strings should be excluded from this app's translations.
-# ignore_translatable_strings_from = []
-
+# Fixtures
+#  run this command to run the fixtures 
+#  bench export-fixtures --app royal_mobile_app
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [["module", "=", "Royal Mobile App"]]
+    }
+]

@@ -1,0 +1,87 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2025-06-22 11:16:40.691354",
+    "default_view": "List",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "patient",
+        "que",
+        "sales_order",
+        "request_type",
+        "request_payload",
+        "response_payload",
+        "transaction_id"
+    ],
+    "fields": [
+        {
+            "fieldname": "patient",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Patient",
+            "options": "Patient",
+            "reqd": 1
+        },
+        {
+            "fieldname": "request_type",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Request Type",
+            "options": "PREAUTHORIZE\nCAPTURE\nCANCEL",
+            "reqd": 1
+        },
+        {
+            "fieldname": "request_payload",
+            "fieldtype": "JSON",
+            "label": "Request Payload"
+        },
+        {
+            "fieldname": "response_payload",
+            "fieldtype": "JSON",
+            "label": "Response Payload"
+        },
+        {
+            "fieldname": "transaction_id",
+            "fieldtype": "Data",
+            "label": "Transaction Id"
+        },
+        {
+            "fieldname": "que",
+            "fieldtype": "Link",
+            "label": "Que",
+            "options": "Que"
+        },
+        {
+            "fieldname": "sales_order",
+            "fieldtype": "Link",
+            "label": "Sales Order",
+            "options": "Sales Order"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2025-06-22 11:32:41.006876",
+    "modified_by": "Administrator",
+    "module": "Royal Mobile App",
+    "name": "Waafi Payment Gateway",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

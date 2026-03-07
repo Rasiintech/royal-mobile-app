@@ -1,0 +1,33 @@
+{
+    "cards": [
+        {
+            "card": "Average Rating"
+        },
+        {
+            "card": "Open Feedbacks"
+        }
+    ],
+    "chart_options": "{\n  \"rowHeight\": 300,\n  \"gutter\": 20,\n  \"borderRadius\": \"8px\",\n  \"cardShadow\": true\n}",
+    "charts": [
+        {
+            "chart": "Feedback by Type",
+            "width": "Half"
+        },
+        {
+            "chart": "Avg Rating Trend",
+            "width": "Half"
+        }
+    ],
+    "creation": "2025-07-30 18:04:29.241712",
+    "dashboard_name": "Patient Feedback Analytics",
+    "docstatus": 0,
+    "doctype": "Dashboard",
+    "idx": 0,
+    "is_default": 1,
+    "is_standard": 1,
+    "modified": "2025-07-30 19:26:19.323851",
+    "modified_by": "Administrator",
+    "module": "Royal Mobile App",
+    "name": "Patient Feedback Analytics",
+    "owner": "Administrator"
+}

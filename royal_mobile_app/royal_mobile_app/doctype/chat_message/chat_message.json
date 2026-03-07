@@ -1,0 +1,99 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2025-08-25 13:11:11.154157",
+    "default_view": "List",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "sender",
+        "sender_type",
+        "receiver",
+        "receiver_type",
+        "message",
+        "seen",
+        "attachment",
+        "amended_from",
+        "timestamp"
+    ],
+    "fields": [
+        {
+            "fieldname": "sender",
+            "fieldtype": "Data",
+            "label": "Sender"
+        },
+        {
+            "fieldname": "receiver",
+            "fieldtype": "Data",
+            "label": "Receiver"
+        },
+        {
+            "fieldname": "message",
+            "fieldtype": "Text",
+            "label": "Message"
+        },
+        {
+            "default": "0",
+            "fieldname": "seen",
+            "fieldtype": "Check",
+            "label": "Seen"
+        },
+        {
+            "fieldname": "attachment",
+            "fieldtype": "Attach",
+            "label": "Attachment"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Chat Message",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "sender_type",
+            "fieldtype": "Select",
+            "label": "Sender Type",
+            "options": "Patient\nDoctor"
+        },
+        {
+            "fieldname": "receiver_type",
+            "fieldtype": "Select",
+            "label": "Receiver Type",
+            "options": "Patient\nDoctor"
+        },
+        {
+            "fieldname": "timestamp",
+            "fieldtype": "Datetime",
+            "label": "Timestamp"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2025-08-25 17:13:45.783882",
+    "modified_by": "Administrator",
+    "module": "Royal Mobile App",
+    "name": "Chat Message",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}
