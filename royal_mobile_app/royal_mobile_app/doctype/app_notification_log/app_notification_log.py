@@ -5,7 +5,7 @@ import frappe
 import json
 import re
 from frappe.model.document import Document
-from medical_app.services.notification_service import NotificationService
+from royal_mobile_app.services.notification_service import NotificationService
 
 class AppNotificationLog(Document):
     def before_save(self):

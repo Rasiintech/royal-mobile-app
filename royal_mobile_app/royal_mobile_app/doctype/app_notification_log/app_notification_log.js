@@ -2,12 +2,12 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('App Notification Log', {
-    refresh: function(frm) {
+    refresh: function (frm) {
         // Add send button for manual retry
         if (frm.doc.status === 'Failed') {
             frm.add_custom_button(__('Retry'), () => {
                 frappe.call({
-                    method: 'medical_app.services.notification_service.retry_notification',
+                    method: 'royal_mobile_app.services.notification_service.retry_notification',
                     args: { name: frm.doc.name },
                     callback: (r) => {
                         if (r.message && r.message.success) {
@@ -31,22 +31,22 @@ frappe.ui.form.on('App Notification Log', {
 
         // Add topic management buttons for push notifications with valid recipients
         // if (frm.doc.type === 'Push Notification' && this.hasValidRecipients(frm)) {
-            frm.add_custom_button(__('Subscribe to Topic'), () => {
-                this.show_topic_dialog(frm, 'subscribe');
-            }).addClass('btn-default');
+        frm.add_custom_button(__('Subscribe to Topic'), () => {
+            this.show_topic_dialog(frm, 'subscribe');
+        }).addClass('btn-default');
 
-            frm.add_custom_button(__('Unsubscribe from Topic'), () => {
-                this.show_topic_dialog(frm, 'unsubscribe');
-            }).addClass('btn-default');
+        frm.add_custom_button(__('Unsubscribe from Topic'), () => {
+            this.show_topic_dialog(frm, 'unsubscribe');
+        }).addClass('btn-default');
         // }
     },
 
-    hasValidRecipients: function(frm) {
+    hasValidRecipients: function (frm) {
         // Check if this is a push notification with identifiable recipients
         if (frm.doc.type !== 'Push Notification') return false;
-        
+
         // Check different recipient types
-        switch(frm.doc.recipient_type) {
+        switch (frm.doc.recipient_type) {
             case 'Single User':
                 return !!frm.doc.user;
             case 'Single Patient':
@@ -63,7 +63,7 @@ frappe.ui.form.on('App Notification Log', {
         }
     },
 
-    show_topic_dialog: function(frm, operation) {
+    show_topic_dialog: function (frm, operation) {
         const dialog = new frappe.ui.Dialog({
             title: __(operation === 'subscribe' ? 'Subscribe to Topic' : 'Unsubscribe from Topic'),
             fields: [
@@ -72,27 +72,27 @@ frappe.ui.form.on('App Notification Log', {
                     fieldname: 'topic',
                     fieldtype: 'Data',
                     reqd: 1,
-                    description: __('Enter the topic name to ' + 
+                    description: __('Enter the topic name to ' +
                         (operation === 'subscribe' ? 'subscribe to' : 'unsubscribe from'))
                 }
             ],
             primary_action_label: __(operation === 'subscribe' ? 'Subscribe' : 'Unsubscribe'),
-            primary_action: function() {
+            primary_action: function () {
                 const values = dialog.get_values();
                 if (values) {
                     frappe.call({
-                        method: 'medical_app.services.notification_service.manage_topic_subscription',
+                        method: 'royal_mobile_app.services.notification_service.manage_topic_subscription',
                         args: {
                             notification_log_name: frm.doc.name,
                             topic: values.topic,
                             operation: operation
                         },
-                        callback: function(r) {
+                        callback: function (r) {
                             if (!r.exc) {
                                 frappe.show_alert({
-                                    message: __(operation === 'subscribe' ? 
-                                        'Successfully subscribed to topic {0}' : 
-                                        'Successfully unsubscribed from topic {0}', 
+                                    message: __(operation === 'subscribe' ?
+                                        'Successfully subscribed to topic {0}' :
+                                        'Successfully unsubscribed from topic {0}',
                                         [values.topic]),
                                     indicator: 'green'
                                 });
@@ -100,13 +100,13 @@ frappe.ui.form.on('App Notification Log', {
                             dialog.hide();
                         },
                         freeze: true,
-                        freeze_message: __(operation === 'subscribe' ? 
+                        freeze_message: __(operation === 'subscribe' ?
                             'Subscribing to topic...' : 'Unsubscribing from topic...')
                     });
                 }
             }
         });
-        
+
         dialog.show();
     }
 });
