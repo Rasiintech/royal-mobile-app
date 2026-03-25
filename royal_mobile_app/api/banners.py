@@ -3,7 +3,7 @@ import time
 from frappe.utils import now_datetime
 from royal_mobile_app.utils.response_utils import response_util
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_all_banners():
     start_time = time.time()
 

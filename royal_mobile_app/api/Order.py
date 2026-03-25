@@ -6,7 +6,7 @@ from royal_mobile_app.utils.erpnext_utils import get_mobile_app_defaults
 
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def validate_sales_order_for_conversion(sales_order_id=None):
     try:
         if not sales_order_id:
@@ -141,7 +141,7 @@ def validate_sales_order_for_conversion(sales_order_id=None):
 
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def convert_sales_order_to_invoice(sales_order_id=None):
     try:
         if not sales_order_id:
@@ -274,7 +274,7 @@ def convert_sales_order_to_invoice(sales_order_id=None):
         )
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_sales_orders_by_mobile(mobile=None):
     try:
         if not mobile:

@@ -3,7 +3,7 @@ from royal_mobile_app.utils.response_utils import response_util
 import time
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_all_doctors():
     try:
         # Fetch all active healthcare practitioners (doctors)
@@ -57,7 +57,7 @@ def get_all_doctors():
             http_status_code=500
         )
     
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_doctors_by_department(department):
     try:
         # Fetch healthcare practitioners based on department
@@ -100,7 +100,7 @@ def get_doctors_by_department(department):
         }
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_all_departments():
     try:
         # Fetch all departments

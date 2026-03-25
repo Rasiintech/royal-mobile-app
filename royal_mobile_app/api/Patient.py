@@ -2,7 +2,7 @@ import frappe
 from royal_mobile_app.utils.response_utils import response_util
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def can_register_patient(full_name, mobile_number):
     if not all([full_name, mobile_number]):
         return response_util(
@@ -28,7 +28,7 @@ def can_register_patient(full_name, mobile_number):
         )
         
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def patient_login(mobile_number):
     if not mobile_number:
         return response_util(
@@ -80,7 +80,7 @@ def patient_login(mobile_number):
         )
         
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobile_number, pat_district):
     try:
         if not pat_full_name:
@@ -124,7 +124,7 @@ def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobil
         )
           
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_patients_with_same_mobile(mobile_number, doctor_name=None):
     if not mobile_number:
         return response_util(
@@ -255,7 +255,7 @@ def get_patient_profile(patient_id, fcm_token=None):
         )
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_districts():
     try:
         districts = frappe.db.get_all("Territory", fields=["territory_name"])
@@ -274,7 +274,7 @@ def get_districts():
             http_status_code=500
         )
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_all_departments():
     try:
         departments = frappe.db.get_all("Department", fields=["name", "department_name"])
@@ -304,7 +304,7 @@ def get_all_departments():
         
         
         
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def submit_patient_feedback(
     patient_id,
     feedback_type,

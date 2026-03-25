@@ -8,7 +8,7 @@ def send_appointment_sms(mobile, message):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), f"SMS sending failed to {mobile}")
 
-@frappe.whislist
+@frappe.whitelist(allow_guest=True)
 def send_otp_sms(mobile, message,**kwargs):
     try:
         sms = HormuudSMSService()

@@ -5,7 +5,7 @@ import json
 from frappe import whitelist
 from frappe.utils import now_datetime
 
-@whitelist(allow_guest=False)
+@whitelist(allow_guest=True)
 def send_message():
     """Send a chat message"""
     try:
@@ -66,7 +66,7 @@ def send_message():
             "error": str(e)
         }
 
-@whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def get_messages():
     """Get message history between two users"""
     try:
@@ -135,7 +135,7 @@ def get_messages():
             "error": str(e)
         }
 
-@whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def get_chat_contacts():
     """Get list of doctors/patients the user can chat with"""
     try:
@@ -226,7 +226,7 @@ def get_chat_contacts():
             "error": str(e)
         }
 
-@whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def mark_messages_as_read():
     """Mark messages as read"""
     try:
@@ -268,7 +268,7 @@ def mark_messages_as_read():
             "error": str(e)
         }
 
-@whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def get_unread_count():
     """Get unread message count for a user"""
     try:

@@ -40,7 +40,7 @@ def calculate_appointment_details(PID, doctor_practitioner, appointment_date):
     return payable_amount, appointment_type, is_follow_up, original_amount
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def validate_appointment_booking(PID, doctor_practitioner, appointment_date):
     try:
         if not all([PID, doctor_practitioner, appointment_date]):
@@ -125,7 +125,7 @@ def validate_appointment_booking(PID, doctor_practitioner, appointment_date):
         )
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def create_appointment(PID, doctor_practitioner, appointment_date):
     try:
         if not all([PID, doctor_practitioner, appointment_date]):
@@ -213,7 +213,7 @@ def create_appointment(PID, doctor_practitioner, appointment_date):
         )      
         
         
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_appointments(mobile_no=None):
 
     # Validate input

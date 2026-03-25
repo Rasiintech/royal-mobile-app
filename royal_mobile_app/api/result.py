@@ -8,7 +8,7 @@ def clean_html(raw_html):
         return raw_html
     return re.sub(r'<[^>]*>', '', raw_html)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_lab_results_by_mobile(mobile=None):
     try:
         if not mobile:
