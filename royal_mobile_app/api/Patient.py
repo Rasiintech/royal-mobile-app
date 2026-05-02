@@ -1,4 +1,5 @@
 import frappe
+from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
 from royal_mobile_app.utils.response_utils import response_util
 
 
@@ -11,7 +12,8 @@ def can_register_patient(full_name, mobile_number):
             http_status_code=400
         )
 
-    exists = frappe.db.exists("Patient", {"mobile_no": mobile_number,"first_name" : full_name})
+    with run_as_administrator_if_guest():
+        exists = frappe.db.exists("Patient", {"mobile_no": mobile_number,"first_name" : full_name})
     if exists:
         return response_util(
             status="error",
@@ -38,17 +40,18 @@ def patient_login(mobile_number):
         )
 
     try:
-        patient = frappe.get_value(
-            "Patient",
-            {"mobile_no": mobile_number},
-            "name",
-            order_by="creation asc"
-        )
+        with run_as_administrator_if_guest():
+            patient = frappe.get_value(
+                "Patient",
+                {"mobile_no": mobile_number},
+                "name",
+                order_by="creation asc"
+            )
 
         if patient:
-            patient_info = frappe.get_doc("Patient", patient)
-            
-            
+            with run_as_administrator_if_guest():
+                patient_info = frappe.get_doc("Patient", patient)
+
             return response_util(
                 status="success",
                 message="Login successful",
@@ -90,16 +93,17 @@ def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobil
                 http_status_code=400
             )
 
-        create_doc = frappe.new_doc("Patient")
-        
-        create_doc.first_name = pat_full_name
-        create_doc.sex = pat_gender
-        create_doc.p_age = pat_age
-        create_doc.age_type = pat_age_type
-        create_doc.mobile_no = pat_mobile_number
-        create_doc.territory = pat_district
-        create_doc.insert()
-        frappe.db.commit()
+        with run_as_administrator_if_guest():
+            create_doc = frappe.new_doc("Patient")
+
+            create_doc.first_name = pat_full_name
+            create_doc.sex = pat_gender
+            create_doc.p_age = pat_age
+            create_doc.age_type = pat_age_type
+            create_doc.mobile_no = pat_mobile_number
+            create_doc.territory = pat_district
+            create_doc.insert()
+            frappe.db.commit()
 
         if create_doc:
             return response_util(
@@ -134,73 +138,74 @@ def get_patients_with_same_mobile(mobile_number, doctor_name=None):
         )
 
     try:
-        patients = frappe.get_all(
-            "Patient",
-            filters={"mobile_no": mobile_number},
-            fields=[
-                "name", "first_name", "p_age", "image",
-                "customer_group", "creation"
-            ],
-            order_by="creation asc"
-        )
+        with run_as_administrator_if_guest():
+            patients = frappe.get_all(
+                "Patient",
+                filters={"mobile_no": mobile_number},
+                fields=[
+                    "name", "first_name", "p_age", "image",
+                    "customer_group", "creation"
+                ],
+                order_by="creation asc"
+            )
 
-        if not patients:
+            if not patients:
+                return response_util(
+                    status="error",
+                    message=f"No patients found for mobile number: {mobile_number}",
+                    http_status_code=404
+                )
+
+            enriched_patients = []
+            for patient in patients:
+                patient_id = patient.get("name")
+
+                # Format image URL
+                patient["image"] = patient.get("image")
+
+                # Ensure required fields exist
+                patient["customer_group"] = patient.get("customer_group") or "All Customer Groups"
+
+                # Try to get the latest Fee Validity record
+                fee_validity = frappe.get_all(
+                    "Fee Validity",
+                    filters={"patient": patient_id, "practitioner" : doctor_name},
+                    fields=["name", "start_date", "valid_till", "status"],
+                    order_by="creation desc",
+                    limit_page_length=1
+                )
+
+                if fee_validity:
+                    fee = fee_validity[0]
+                    patient["followupId"] = fee.get("name")
+                    patient["followupStartDate"] = fee.get("start_date")
+                    patient["followupExpirationDate"] = fee.get("valid_till")
+                    patient["followupStatus"] = fee.get("status")
+                else:
+                    patient["followupId"] = None
+                    patient["followupStartDate"] = None
+                    patient["followupExpirationDate"] = None
+                    patient["followupStatus"] = None
+
+                # Rename fields for frontend consistency
+                enriched_patients.append({
+                    "name": patient["name"],
+                    "first_name": patient["first_name"],
+                    "p_age": patient["p_age"],
+                    "image": patient["image"],
+                    "customer_group": patient["customer_group"],
+                    "followupId": patient["followupId"],
+                    "followupStartDate": patient["followupStartDate"],
+                    "followupExpirationDate": patient["followupExpirationDate"],
+                    "followupStatus": patient["followupStatus"]
+                })
+
             return response_util(
-                status="error",
-                message=f"No patients found for mobile number: {mobile_number}",
-                http_status_code=404
+                status="success",
+                message="Patients found successfully.",
+                data=enriched_patients,
+                http_status_code=200
             )
-
-        enriched_patients = []
-        for patient in patients:
-            patient_id = patient.get("name")
-
-            # Format image URL
-            patient["image"] = patient.get("image")
-
-            # Ensure required fields exist
-            patient["customer_group"] = patient.get("customer_group") or "All Customer Groups"
-
-            # Try to get the latest Fee Validity record
-            fee_validity = frappe.get_all(
-                "Fee Validity",
-                filters={"patient": patient_id, "practitioner" : doctor_name},
-                fields=["name", "start_date", "valid_till", "status"],
-                order_by="creation desc",
-                limit_page_length=1
-            )
-
-            if fee_validity:
-                fee = fee_validity[0]
-                patient["followupId"] = fee.get("name")
-                patient["followupStartDate"] = fee.get("start_date")
-                patient["followupExpirationDate"] = fee.get("valid_till")
-                patient["followupStatus"] = fee.get("status")
-            else:
-                patient["followupId"] = None
-                patient["followupStartDate"] = None
-                patient["followupExpirationDate"] = None
-                patient["followupStatus"] = None
-
-            # Rename fields for frontend consistency
-            enriched_patients.append({
-                "name": patient["name"],
-                "first_name": patient["first_name"],
-                "p_age": patient["p_age"],
-                "image": patient["image"],
-                "customer_group": patient["customer_group"],
-                "followupId": patient["followupId"],
-                "followupStartDate": patient["followupStartDate"],
-                "followupExpirationDate": patient["followupExpirationDate"],
-                "followupStatus": patient["followupStatus"]
-            })
-
-        return response_util(
-            status="success",
-            message="Patients found successfully.",
-            data=enriched_patients,
-            http_status_code=200
-        )
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Patients with Same Mobile Error")
@@ -215,29 +220,30 @@ def get_patients_with_same_mobile(mobile_number, doctor_name=None):
 @frappe.whitelist(allow_guest=True)
 def get_patient_profile(patient_id, fcm_token=None):
     try:
-        patient_doc = frappe.get_doc("Patient", patient_id)
+        with run_as_administrator_if_guest():
+            patient_doc = frappe.get_doc("Patient", patient_id)
 
-        # Safely update FCM token if the field exists and token is provided
-        if fcm_token and hasattr(patient_doc, "fcm_token"):
-            if not patient_doc.fcm_token or patient_doc.fcm_token != fcm_token:
-                patient_doc.fcm_token = fcm_token
-                patient_doc.save(ignore_permissions=True)
-                frappe.db.commit()
+            # Safely update FCM token if the field exists and token is provided
+            if fcm_token and hasattr(patient_doc, "fcm_token"):
+                if not patient_doc.fcm_token or patient_doc.fcm_token != fcm_token:
+                    patient_doc.fcm_token = fcm_token
+                    patient_doc.save(ignore_permissions=True)
+                    frappe.db.commit()
 
-        return response_util(
-            status="success",
-            message="Patient profile retrieved successfully",
-            data={
-                "patient_id": patient_doc.name,
-                "first_name": patient_doc.first_name,
-                "gender": patient_doc.sex,
-                "age": patient_doc.p_age,
-                "mobile": patient_doc.mobile_no,
-                "district": patient_doc.territory,
-                "image": patient_doc.get('image')
-            },
-            http_status_code=200
-        )
+            return response_util(
+                status="success",
+                message="Patient profile retrieved successfully",
+                data={
+                    "patient_id": patient_doc.name,
+                    "first_name": patient_doc.first_name,
+                    "gender": patient_doc.sex,
+                    "age": patient_doc.p_age,
+                    "mobile": patient_doc.mobile_no,
+                    "district": patient_doc.territory,
+                    "image": patient_doc.get('image')
+                },
+                http_status_code=200
+            )
 
     except frappe.DoesNotExistError:
         return response_util(
@@ -258,7 +264,8 @@ def get_patient_profile(patient_id, fcm_token=None):
 @frappe.whitelist(allow_guest=True)
 def get_districts():
     try:
-        districts = frappe.db.get_all("Territory", fields=["territory_name"])
+        with run_as_administrator_if_guest():
+            districts = frappe.db.get_all("Territory", fields=["territory_name"])
         return response_util(
             status="success",
             message="Districts found successfully.",
@@ -277,7 +284,8 @@ def get_districts():
 @frappe.whitelist(allow_guest=True)
 def get_all_departments():
     try:
-        departments = frappe.db.get_all("Department", fields=["name", "department_name"])
+        with run_as_administrator_if_guest():
+            departments = frappe.db.get_all("Department", fields=["name", "department_name"])
 
         if not departments:
             return response_util(
@@ -336,14 +344,6 @@ def submit_patient_feedback(
                 http_status_code=400
             )
 
-        # Validate patient exists
-        if not frappe.db.exists("Patient", patient_id):
-            return response_util(
-                status="error",
-                message="Patient not found",
-                http_status_code=404
-            )
-
         # Validate feedback type
         valid_types = [
             "General Feedback", "Doctor Feedback", "Facility Feedback",
@@ -377,41 +377,48 @@ def submit_patient_feedback(
             )
 
         # === CREATE FEEDBACK ===
-        feedback = frappe.new_doc("Patient Feedback")
-        feedback.update({
-            "patient": patient_id,
-            "feedback_type": feedback_type,
-            "rating": rating,
-            "comments": comments,
-            "status": "Open"  # Default status
-        })
+        with run_as_administrator_if_guest():
+            if not frappe.db.exists("Patient", patient_id):
+                return response_util(
+                    status="error",
+                    message="Patient not found",
+                    http_status_code=404
+                )
 
-        # Add app-specific fields if applicable
-        if feedback_type == "App Related Feedback":
+            feedback = frappe.new_doc("Patient Feedback")
             feedback.update({
-                "app_feedback_category": app_feedback_category,
-                "app_version": app_version or "1.0.0",
-                "device_info": device_info or "{}"
+                "patient": patient_id,
+                "feedback_type": feedback_type,
+                "rating": rating,
+                "comments": comments,
+                "status": "Open"  # Default status
             })
 
-        # Auto-set patient name
-        feedback.patient_name = frappe.db.get_value("Patient", patient_id, "patient_name")
+            # Add app-specific fields if applicable
+            if feedback_type == "App Related Feedback":
+                feedback.update({
+                    "app_feedback_category": app_feedback_category,
+                    "app_version": app_version or "1.0.0",
+                    "device_info": device_info or "{}"
+                })
 
-        # Save with auto-naming (PFB-YYYYMM-####)
-        feedback.insert(ignore_permissions=True)
-        frappe.db.commit()
+            # Auto-set patient name
+            feedback.patient_name = frappe.db.get_value("Patient", patient_id, "patient_name")
 
-        # === RESPONSE ===
-        return response_util(
-            status="success",
-            message="Feedback submitted successfully",
-            data={
-                "feedback_id": feedback.name,
-                "patient_name": feedback.patient_name,
-                "submitted_on": feedback.creation
-            },
-            http_status_code=201
-        )
+            # Save with auto-naming (PFB-YYYYMM-####)
+            feedback.insert(ignore_permissions=True)
+            frappe.db.commit()
+
+            return response_util(
+                status="success",
+                message="Feedback submitted successfully",
+                data={
+                    "feedback_id": feedback.name,
+                    "patient_name": feedback.patient_name,
+                    "submitted_on": feedback.creation
+                },
+                http_status_code=201
+            )
 
     except Exception as e:
         frappe.log_error(

@@ -1,7 +1,37 @@
 import frappe
+from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
 from royal_mobile_app.utils.response_utils import response_util
 from datetime import datetime
 from royal_mobile_app.utils.erpnext_utils import get_mobile_app_defaults
+
+
+def _count_que_appointments_for_doctor_on_date(practitioner, appointment_date):
+    """Active Que rows (not cancelled) for this practitioner on this date (any source)."""
+    return frappe.db.count(
+        "Que",
+        {"practitioner": practitioner, "date": appointment_date, "docstatus": ["<", 2]},
+    )
+
+
+def _doctor_daily_limit_error(defaults, practitioner, appointment_date):
+    """
+    If Mobile App Settings caps daily slots per doctor, enforce against current Que count.
+    limit <= 0 means no cap (open-ended).
+    """
+    limit = int(defaults.get("appointments_per_doctor_limit") or 0)
+    if limit <= 0:
+        return None
+    current = _count_que_appointments_for_doctor_on_date(practitioner, appointment_date)
+    if current >= limit:
+        return response_util(
+            status="error",
+            message=(
+                "This doctor has reached the daily appointment limit for this date. "
+                "Please choose another date or doctor."
+            ),
+            http_status_code=400,
+        )
+    return None
 
 
 def calculate_appointment_details(PID, doctor_practitioner, appointment_date):
@@ -50,63 +80,68 @@ def validate_appointment_booking(PID, doctor_practitioner, appointment_date):
                 http_status_code=400,
             )
 
-        if not frappe.db.exists("Patient", PID):
-            return response_util(
-                status="error",
-                message=f"Patient with ID {PID} does not exist.",
-                http_status_code=404,
+        with run_as_administrator_if_guest():
+            if not frappe.db.exists("Patient", PID):
+                return response_util(
+                    status="error",
+                    message=f"Patient with ID {PID} does not exist.",
+                    http_status_code=404,
+                )
+
+            if not frappe.db.exists("Healthcare Practitioner", doctor_practitioner):
+                return response_util(
+                    status="error",
+                    message=f"Doctor {doctor_practitioner} does not exist.",
+                    http_status_code=404,
+                )
+
+            if frappe.db.exists(
+                "Que",
+                {"patient": PID, "practitioner": doctor_practitioner, "date": appointment_date, "docstatus": ("<", 2)},
+            ):
+                return response_util(
+                    status="error",
+                    message="An appointment for this patient with the same doctor on this date already exists.",
+                    http_status_code=400,
+                )
+
+            defaults = get_mobile_app_defaults()
+            limit_err = _doctor_daily_limit_error(defaults, doctor_practitioner, appointment_date)
+            if limit_err:
+                return limit_err
+
+            payable_amount, appointment_type, is_follow_up, original_amount = calculate_appointment_details(
+                PID, doctor_practitioner, appointment_date
             )
 
-        if not frappe.db.exists("Healthcare Practitioner", doctor_practitioner):
-            return response_util(
-                status="error",
-                message=f"Doctor {doctor_practitioner} does not exist.",
-                http_status_code=404,
-            )
-
-        if frappe.db.exists(
-            "Que",
-            {"patient": PID, "practitioner": doctor_practitioner, "date": appointment_date, "docstatus": ("<", 2)},
-        ):
-            return response_util(
-                status="error",
-                message="An appointment for this patient with the same doctor on this date already exists.",
-                http_status_code=400,
-            )
-
-        payable_amount, appointment_type, is_follow_up, original_amount = calculate_appointment_details(
-            PID, doctor_practitioner, appointment_date
-        )
-        defaults = get_mobile_app_defaults()
-
-        temp_doc = frappe.new_doc("Que")
-        temp_doc.update({
-            "patient": PID,
-            "practitioner": doctor_practitioner,
-            "date": appointment_date,
-            "paid_amount": payable_amount,
-            "mode_of_payment": defaults["mode_of_payment"],
-            "cost_center": defaults["cost_center"],
-            "appointment_source": "Mobile App",
-            "que_type": appointment_type,
-            "follow_up": is_follow_up,
-        })
-        temp_doc.run_method("validate")
-
-        customer_group = frappe.db.get_value("Patient", PID, "customer_group")
-
-        return response_util(
-            status="success",
-            message="Patient is eligible to book appointment.",
-            data={
-                "appointment_type": appointment_type,
+            temp_doc = frappe.new_doc("Que")
+            temp_doc.update({
+                "patient": PID,
+                "practitioner": doctor_practitioner,
+                "date": appointment_date,
                 "paid_amount": payable_amount,
-                "original_amount": original_amount,
-                "is_follow_up": is_follow_up,
-                "customer_group": customer_group,
-            },
-            http_status_code=200,
-        )
+                "mode_of_payment": defaults["mode_of_payment"],
+                "cost_center": defaults["cost_center"],
+                "appointment_source": "Mobile App",
+                "que_type": appointment_type,
+                "follow_up": is_follow_up,
+            })
+            temp_doc.run_method("validate")
+
+            customer_group = frappe.db.get_value("Patient", PID, "customer_group")
+
+            return response_util(
+                status="success",
+                message="Patient is eligible to book appointment.",
+                data={
+                    "appointment_type": appointment_type,
+                    "paid_amount": payable_amount,
+                    "original_amount": original_amount,
+                    "is_follow_up": is_follow_up,
+                    "customer_group": customer_group,
+                },
+                http_status_code=200,
+            )
 
     except frappe.ValidationError as ve:
         return response_util(
@@ -136,71 +171,76 @@ def create_appointment(PID, doctor_practitioner, appointment_date):
                 http_status_code=400,
             )
 
-        defaults = get_mobile_app_defaults()
-        if not defaults.get("cost_center") or not defaults.get("mode_of_payment"):
-            return response_util(
-                status="error",
-                message="Mobile App Settings not configured. Please set Cost Center and Mode of Payment.",
-                http_status_code=500,
+        with run_as_administrator_if_guest():
+            defaults = get_mobile_app_defaults()
+            if not defaults.get("cost_center") or not defaults.get("mode_of_payment"):
+                return response_util(
+                    status="error",
+                    message="Mobile App Settings not configured. Please set Cost Center and Mode of Payment.",
+                    http_status_code=500,
+                )
+
+            if not frappe.db.exists("Patient", PID):
+                return response_util(
+                    status="error",
+                    message=f"Patient with ID {PID} does not exist.",
+                    data=None,
+                    http_status_code=404,
+                )
+
+            if not frappe.db.exists("Healthcare Practitioner", doctor_practitioner):
+                return response_util(
+                    status="error",
+                    message=f"Doctor with ID {doctor_practitioner} does not exist.",
+                    data=None,
+                    http_status_code=404,
+                )
+
+            if frappe.db.exists(
+                "Que",
+                {"patient": PID, "practitioner": doctor_practitioner, "date": appointment_date, "docstatus": ("<", 2)},
+            ):
+                return response_util(
+                    status="error",
+                    message="An appointment for this patient with the same doctor on this date already exists.",
+                    http_status_code=400,
+                )
+
+            limit_err = _doctor_daily_limit_error(defaults, doctor_practitioner, appointment_date)
+            if limit_err:
+                return limit_err
+
+            payable_amount, appointment_type, is_follow_up, original_amount = calculate_appointment_details(
+                PID, doctor_practitioner, appointment_date
             )
 
-        if not frappe.db.exists("Patient", PID):
+            appointment = frappe.new_doc("Que")
+            appointment.update({
+                "patient": PID,
+                "practitioner": doctor_practitioner,
+                "date": appointment_date,
+                "paid_amount": payable_amount,
+                "mode_of_payment": defaults["mode_of_payment"],
+                "cost_center": defaults["cost_center"],
+                "appointment_source": "Mobile App",
+                "que_type": appointment_type,
+                "follow_up": is_follow_up,
+            })
+
+            appointment.insert()
+            frappe.db.commit()
+
             return response_util(
-                status="error",
-                message=f"Patient with ID {PID} does not exist.",
-                data=None,
-                http_status_code=404,
+                status="success",
+                message="Appointment created successfully",
+                data={
+                    "appointment_id": appointment.name,
+                    "appointment_type": appointment_type,
+                    "amount_charged": payable_amount,
+                    "original_amount": original_amount,
+                },
+                http_status_code=200,
             )
-
-        if not frappe.db.exists("Healthcare Practitioner", doctor_practitioner):
-            return response_util(
-                status="error",
-                message=f"Doctor with ID {doctor_practitioner} does not exist.",
-                data=None,
-                http_status_code=404,
-            )
-
-        if frappe.db.exists(
-            "Que",
-            {"patient": PID, "practitioner": doctor_practitioner, "date": appointment_date, "docstatus": ("<", 2)},
-        ):
-            return response_util(
-                status="error",
-                message="An appointment for this patient with the same doctor on this date already exists.",
-                http_status_code=400,
-            )
-
-        payable_amount, appointment_type, is_follow_up, original_amount = calculate_appointment_details(
-            PID, doctor_practitioner, appointment_date
-        )
-
-        appointment = frappe.new_doc("Que")
-        appointment.update({
-            "patient": PID,
-            "practitioner": doctor_practitioner,
-            "date": appointment_date,
-            "paid_amount": payable_amount,
-            "mode_of_payment": defaults["mode_of_payment"],
-            "cost_center": defaults["cost_center"],
-            "appointment_source": "Mobile App",
-            "que_type": appointment_type,
-            "follow_up": is_follow_up,
-        })
-
-        appointment.insert()
-        frappe.db.commit()
-
-        return response_util(
-            status="success",
-            message="Appointment created successfully",
-            data={
-                "appointment_id": appointment.name,
-                "appointment_type": appointment_type,
-                "amount_charged": payable_amount,
-                "original_amount": original_amount,
-            },
-            http_status_code=200,
-        )
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Create Appointment Error")
@@ -225,35 +265,36 @@ def get_appointments(mobile_no=None):
         }
 
     try:
-        # Only return last 90 days
-        cutoff_date = frappe.utils.add_days(frappe.utils.today(), -90)
+        with run_as_administrator_if_guest():
+            # Only return last 90 days
+            cutoff_date = frappe.utils.add_days(frappe.utils.today(), -90)
 
-        # Fetch all appointments (Que docs) linked to this patient
-        appointments = frappe.get_all(
-            "Que",
-            filters={"mobile": mobile_no, "docstatus": ["<", 2], "creation": [">=", cutoff_date]},
-            fields=["name", "patient","patient_name", "practitioner", "paid_amount", "creation", 
-                    "appointment_source","token_no"
-                    ],
-            order_by="creation desc"
-        )
+            # Fetch all appointments (Que docs) linked to this patient
+            appointments = frappe.get_all(
+                "Que",
+                filters={"mobile": mobile_no, "docstatus": ["<", 2], "creation": [">=", cutoff_date]},
+                fields=["name", "patient","patient_name", "practitioner", "paid_amount", "creation",
+                        "appointment_source","token_no"
+                        ],
+                order_by="creation desc"
+            )
 
-        # If no appointments found, return 404
-        if not appointments:
-            frappe.response['http_status_code'] = 404
+            # If no appointments found, return 404
+            if not appointments:
+                frappe.response['http_status_code'] = 404
+                return {
+                    "status": "error",
+                    "msg": f"No appointments found for patient: {mobile_no}",
+                    "Data": None
+                }
+
+            # Return appointments list
+            frappe.response['http_status_code'] = 200
             return {
-                "status": "error",
-                "msg": f"No appointments found for patient: {mobile_no}",
-                "Data": None
+                "status": "success",
+                "msg": "Appointments retrieved successfully",
+                "Data": appointments
             }
-
-        # Return appointments list
-        frappe.response['http_status_code'] = 200
-        return {
-            "status": "success",
-            "msg": "Appointments retrieved successfully",
-            "Data": appointments
-        }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Appointments Error")

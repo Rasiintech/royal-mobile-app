@@ -1,4 +1,5 @@
 import frappe
+from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
 from royal_mobile_app.utils.response_utils import response_util
 import time
 
@@ -6,46 +7,43 @@ import time
 @frappe.whitelist(allow_guest=True)
 def get_all_doctors():
     try:
-        # Fetch all active healthcare practitioners (doctors)
-        doctors = frappe.get_all(
-            "Healthcare Practitioner",
-            filters={"status": "Active", "hide_doctor": 0},
-            fields=[
-                "name", 
-                "op_consulting_charge", 
-                "department", 
-                "image", 
-                "about",
-                "experience_years", 
-                "available_time",
-                "hide_doctor",
-                "total_patients",
-                "rating"
-            ]
-        )
-
-        departments = frappe.get_all(
-            "Medical Department",
-            fields=["name", "department", "image"]
-        )
-
-        # Check if doctors list is empty
-        if not doctors:
-            return response_util(
-                status="error",
-                message="No doctors found in the system.",
-                data=None,
-                http_status_code=404
+        with run_as_administrator_if_guest():
+            doctors = frappe.get_all(
+                "Healthcare Practitioner",
+                filters={"status": "Active", "hide_doctor": 0},
+                fields=[
+                    "name",
+                    "op_consulting_charge",
+                    "department",
+                    "image",
+                    "about",
+                    "experience_years",
+                    "available_time",
+                    "hide_doctor",
+                    "total_patients",
+                    "rating"
+                ]
             )
 
-        # Return the list of doctors
-        return response_util(
-            status="success",
-            message="Doctors fetched successfully",
-            # data=doctors,
-            data={"doctors": doctors, "departments": departments},
-            http_status_code=200
-        )
+            departments = frappe.get_all(
+                "Medical Department",
+                fields=["name", "department", "image"]
+            )
+
+            if not doctors:
+                return response_util(
+                    status="error",
+                    message="No doctors found in the system.",
+                    data=None,
+                    http_status_code=404
+                )
+
+            return response_util(
+                status="success",
+                message="Doctors fetched successfully",
+                data={"doctors": doctors, "departments": departments},
+                http_status_code=200
+            )
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get All Doctors Error")
@@ -60,34 +58,31 @@ def get_all_doctors():
 @frappe.whitelist(allow_guest=True)
 def get_doctors_by_department(department):
     try:
-        # Fetch healthcare practitioners based on department
-        doctors = frappe.get_all(
-            "Healthcare Practitioner",
-            filters={
-                "status": "Active",
-                "hide_doctor": 0,
-                "department": department
-            },
-            fields=["practitioner_name", "op_consulting_charge", "department", "image", "about", "experience_years", "available_time", "hide_doctor", "total_patients", "rating"]
-        )
+        with run_as_administrator_if_guest():
+            doctors = frappe.get_all(
+                "Healthcare Practitioner",
+                filters={
+                    "status": "Active",
+                    "hide_doctor": 0,
+                    "department": department
+                },
+                fields=["practitioner_name", "op_consulting_charge", "department", "image", "about", "experience_years", "available_time", "hide_doctor", "total_patients", "rating"]
+            )
 
-        # Check if doctors list is empty
-        if not doctors:
-            frappe.response['http_status_code'] = 404
+            if not doctors:
+                frappe.response['http_status_code'] = 404
+                return {
+                    "status": "error",
+                    "msg": "No doctors found in the system.",
+                    "Data": None
+                }
+
+            frappe.response['http_status_code'] = 200
             return {
-                "status": "error",
-                "msg": "No doctors found in the system.",
-                "Data": None
+                "status": "success",
+                "msg": "Doctors found successfully.",
+                "Data": doctors
             }
-        
-
-        # Return the filtered list of doctors
-        frappe.response['http_status_code'] = 200
-        return {
-            "status": "success",
-            "msg": "Doctors found successfully.",
-            "Data": doctors
-        }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get Doctors by Department Error")
@@ -103,28 +98,26 @@ def get_doctors_by_department(department):
 @frappe.whitelist(allow_guest=True)
 def get_all_departments():
     try:
-        # Fetch all departments
-        departments = frappe.get_all(
-            "Medical Department",  # Replace with the exact Doctype name for your departments if it's different
-            fields=["name", "department", "image"]  # Make sure 'image' is a valid field in your Doctype
-        )
+        with run_as_administrator_if_guest():
+            departments = frappe.get_all(
+                "Medical Department",
+                fields=["name", "department", "image"]
+            )
 
-        # Check if departments list is empty
-        if not departments:
-            frappe.response['http_status_code'] = 404
+            if not departments:
+                frappe.response['http_status_code'] = 404
+                return {
+                    "status": "error",
+                    "msg": "No departments found in the system.",
+                    "Data": None
+                }
+
+            frappe.response['http_status_code'] = 200
             return {
-                "status": "error",
-                "msg": "No departments found in the system.",
-                "Data": None
+                "status": "success",
+                "msg": "Departments found successfully.",
+                "Data": departments
             }
-
-        # Return the list of departments
-        frappe.response['http_status_code'] = 200
-        return {
-            "status": "success",
-            "msg": "Departments found successfully.",
-            "Data": departments
-        }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Get All Departments Error")
