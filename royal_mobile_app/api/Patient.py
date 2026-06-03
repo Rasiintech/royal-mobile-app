@@ -102,6 +102,7 @@ def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobil
             create_doc.age_type = pat_age_type
             create_doc.mobile_no = pat_mobile_number
             create_doc.territory = pat_district
+            create_doc.how_did_you_hear_about_our_hospital = "Social Media"
             create_doc.insert()
             frappe.db.commit()
 

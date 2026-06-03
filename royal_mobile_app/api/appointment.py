@@ -34,6 +34,39 @@ def _doctor_daily_limit_error(defaults, practitioner, appointment_date):
     return None
 
 
+def _appointment_cutoff_error(defaults, appointment_date):
+    """
+    Enforce appointment_end_time from Mobile App Settings for same-day bookings only.
+    Future dates skip the time check; past dates are rejected.
+    """
+    from frappe.utils import getdate, get_time, nowdate, nowtime
+
+    booking_date = getdate(appointment_date)
+    today = getdate(nowdate())
+
+    if booking_date < today:
+        return response_util(
+            status="error",
+            message="Appointment date cannot be in the past.",
+            http_status_code=400,
+        )
+
+    if booking_date > today:
+        return None
+
+    end_time = defaults.get("appointment_end_time")
+    if not end_time:
+        return None
+
+    if get_time(nowtime()) >= get_time(end_time):
+        return response_util(
+            status="error",
+            message="Appointments for today are no longer accepted. Please choose another date.",
+            http_status_code=400,
+        )
+    return None
+
+
 def calculate_appointment_details(PID, doctor_practitioner, appointment_date):
     """Calculates pricing, type, and follow-up status in one place (DRY)."""
     appointment_date_obj = datetime.strptime(appointment_date, "%Y-%m-%d").date()
@@ -53,7 +86,7 @@ def calculate_appointment_details(PID, doctor_practitioner, appointment_date):
         "Fee Validity",
         filters={"patient": PID, "practitioner": doctor_practitioner, "status": "Pending"},
         fields=["valid_till", "visited", "max_visits"],
-        order_by="creation desc",
+        order_by="valid_till desc",
         limit_page_length=1,
     )
 
@@ -106,6 +139,10 @@ def validate_appointment_booking(PID, doctor_practitioner, appointment_date):
                 )
 
             defaults = get_mobile_app_defaults()
+            cutoff_err = _appointment_cutoff_error(defaults, appointment_date)
+            if cutoff_err:
+                return cutoff_err
+
             limit_err = _doctor_daily_limit_error(defaults, doctor_practitioner, appointment_date)
             if limit_err:
                 return limit_err
@@ -206,6 +243,10 @@ def create_appointment(PID, doctor_practitioner, appointment_date):
                     http_status_code=400,
                 )
 
+            cutoff_err = _appointment_cutoff_error(defaults, appointment_date)
+            if cutoff_err:
+                return cutoff_err
+
             limit_err = _doctor_daily_limit_error(defaults, doctor_practitioner, appointment_date)
             if limit_err:
                 return limit_err
@@ -272,11 +313,11 @@ def get_appointments(mobile_no=None):
             # Fetch all appointments (Que docs) linked to this patient
             appointments = frappe.get_all(
                 "Que",
-                filters={"mobile": mobile_no, "docstatus": ["<", 2], "creation": [">=", cutoff_date]},
-                fields=["name", "patient","patient_name", "practitioner", "paid_amount", "creation",
+                filters={"mobile": mobile_no, "docstatus": ["<", 2], "date": [">=", cutoff_date]},
+                fields=["name", "patient","patient_name", "practitioner", "paid_amount", "date",
                         "appointment_source","token_no"
                         ],
-                order_by="creation desc"
+                order_by="date desc"
             )
 
             # If no appointments found, return 404

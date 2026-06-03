@@ -47,8 +47,7 @@
   {
    "fieldname": "appointment_end_time",
    "fieldtype": "Time",
-   "label": "Appointment End Time",
-   "reqd": 1
+   "label": "Appointment End Time"
   },
   {
    "default": "50",
@@ -61,7 +60,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-02 15:22:45.638820",
+ "modified": "2026-06-03 12:11:18.954873",
  "modified_by": "Administrator",
  "module": "Royal Mobile App",
  "name": "Mobile App Settings",

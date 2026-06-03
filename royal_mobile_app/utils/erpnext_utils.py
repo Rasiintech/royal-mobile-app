@@ -14,6 +14,7 @@ def get_mobile_app_defaults():
         "cost_center": settings.default_cost_center,
         "mode_of_payment": settings.default_mode_of_payment,
         "appointments_per_doctor_limit": cint(
-            getattr(settings, "appointments_per_doctor_limit", None) or 0
+            getattr(settings, "appointments_per_doctor_limit", None) or 50
         ),
+        "appointment_end_time": settings.appointment_end_time,
     }
