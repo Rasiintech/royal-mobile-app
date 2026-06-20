@@ -197,7 +197,7 @@ def convert_sales_order_to_invoice(sales_order_id=None):
             si_doc.posting_date = frappe.utils.nowdate()
             si_doc.ref_practitioner = so_doc.ref_practitioner
             si_doc.cost_center = defaults["cost_center"]
-
+            si_doc.source_order = "OPD",
             for item in so_doc.items:
                 si_doc.append("items", {
                     "item_code": item.item_code,

@@ -12,7 +12,8 @@
   "default_mode_of_payment",
   "appointment_section",
   "appointments_per_doctor_limit",
-  "appointment_end_time"
+  "appointment_end_time",
+  "source_order"
  ],
  "fields": [
   {
@@ -55,12 +56,18 @@
    "fieldtype": "Int",
    "label": "Appointments Per Doctor Limit",
    "reqd": 1
+  },
+  {
+   "fieldname": "source_order",
+   "fieldtype": "Link",
+   "label": "Source Order",
+   "options": "Source Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-03 12:11:18.954873",
+ "modified": "2026-06-14 16:56:33.071148",
  "modified_by": "Administrator",
  "module": "Royal Mobile App",
  "name": "Mobile App Settings",
