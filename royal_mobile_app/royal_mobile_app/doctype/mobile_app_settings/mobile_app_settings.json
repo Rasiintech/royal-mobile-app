@@ -10,10 +10,11 @@
   "default_company",
   "default_cost_center",
   "default_mode_of_payment",
+  "source_order",
   "appointment_section",
+  "enable_future_appointments",
   "appointments_per_doctor_limit",
-  "appointment_end_time",
-  "source_order"
+  "appointment_end_time"
  ],
  "fields": [
   {
@@ -62,12 +63,18 @@
    "fieldtype": "Link",
    "label": "Source Order",
    "options": "Source Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_future_appointments",
+   "fieldtype": "Check",
+   "label": "Enable Future Appointments"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-14 16:56:33.071148",
+ "modified": "2026-06-21 12:05:31.876357",
  "modified_by": "Administrator",
  "module": "Royal Mobile App",
  "name": "Mobile App Settings",

@@ -17,4 +17,6 @@ def get_mobile_app_defaults():
             getattr(settings, "appointments_per_doctor_limit", None) or 50
         ),
         "appointment_end_time": settings.appointment_end_time,
+        "enable_future_appointments": cint(getattr(settings, "enable_future_appointments", None) or 0),
+        "source_order": settings.source_order,
     }
