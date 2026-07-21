@@ -304,6 +304,15 @@ def get_sales_orders_by_mobile(mobile=None):
                 http_status_code=400,
             )
 
+        # Temporary always return empty list
+        # Reason : the hospital disabled the order feature in the mobile app
+        return response_util(
+            status="success",
+            message="Sales Orders retrieved successfully",
+            data=[],
+            http_status_code=200,
+        )
+
         with run_as_administrator_if_guest():
             patient_records = frappe.get_all(
                 "Patient",
