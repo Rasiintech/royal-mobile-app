@@ -14,7 +14,12 @@
   "appointment_section",
   "enable_future_appointments",
   "appointments_per_doctor_limit",
-  "appointment_end_time"
+  "appointment_end_time",
+  "section_break_94bcr",
+  "enable_mobile_consultation_fee",
+  "mobile_consultation_item",
+  "mobile_consultation_rate",
+  "payment_gateway_fee_percentage"
  ],
  "fields": [
   {
@@ -69,12 +74,45 @@
    "fieldname": "enable_future_appointments",
    "fieldtype": "Check",
    "label": "Enable Future Appointments"
+  },
+  {
+   "fieldname": "section_break_94bcr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_mobile_consultation_fee",
+   "fieldtype": "Check",
+   "label": "Enable Mobile Consultation Fee"
+  },
+  {
+   "depends_on": "eval:doc.enable_mobile_consultation_fee",
+   "fieldname": "mobile_consultation_item",
+   "fieldtype": "Link",
+   "label": "Mobile Consultation Item",
+   "mandatory_depends_on": "eval:doc.enable_mobile_consultation_fee",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.enable_mobile_consultation_fee",
+   "fieldname": "mobile_consultation_rate",
+   "fieldtype": "Currency",
+   "label": "Mobile Consultation Rate",
+   "mandatory_depends_on": "eval:doc.enable_mobile_consultation_fee"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.enable_mobile_consultation_fee",
+   "fieldname": "payment_gateway_fee_percentage",
+   "fieldtype": "Percent",
+   "label": "Payment Gateway Fee Percentage",
+   "mandatory_depends_on": "eval:doc.enable_mobile_consultation_fee"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-21 12:05:31.876357",
+ "modified": "2026-07-24 12:03:18.568701",
  "modified_by": "Administrator",
  "module": "Royal Mobile App",
  "name": "Mobile App Settings",

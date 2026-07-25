@@ -7,17 +7,7 @@
     "engine": "InnoDB",
     "field_order": [
         "app_name",
-        "section_break_credentials",
-        "project_id",
         "sender_id",
-        "client_email",
-        "private_key",
-        "private_key_id",
-        "client_id",
-        "auth_uri",
-        "token_uri",
-        "auth_provider_x509_cert_url",
-        "client_x509_cert_url",
         "service_account_json",
         "column_break_settings",
         "default_app",
@@ -30,27 +20,19 @@
             "fieldtype": "Data",
             "in_list_view": 1,
             "label": "App Name",
-            "reqd": 1,
-            "unique": 1
-        },
-        {
-            "fieldname": "section_break_credentials",
-            "fieldtype": "Section Break",
-            "label": "Firebase Credentials"
+            "reqd": 1
         },
         {
             "fieldname": "sender_id",
             "fieldtype": "Data",
             "in_list_view": 1,
-            "label": "Sender ID",
-            "reqd": 1,
-            "unique": 1
+            "label": "Sender ID"
         },
         {
-            "fieldname": "project_id",
-            "fieldtype": "Data",
+            "fieldname": "service_account_json",
+            "fieldtype": "Attach",
             "in_list_view": 1,
-            "label": "Project ID",
+            "label": "Service Account",
             "reqd": 1
         },
         {
@@ -58,7 +40,7 @@
             "fieldtype": "Column Break"
         },
         {
-            "default": "1",
+            "default": "0",
             "fieldname": "default_app",
             "fieldtype": "Check",
             "label": "Default Configuration"
@@ -71,64 +53,17 @@
             "label": "Active"
         },
         {
+            "default": "High",
             "fieldname": "priority",
             "fieldtype": "Select",
             "label": "Message Priority",
             "options": "Normal\nHigh"
-        },
-        {
-            "fieldname": "client_email",
-            "fieldtype": "Data",
-            "in_list_view": 1,
-            "label": "Client Email",
-            "reqd": 1
-        },
-        {
-            "fieldname": "private_key",
-            "fieldtype": "Password",
-            "label": "Private Key",
-            "reqd": 1
-        },
-        {
-            "fieldname": "private_key_id",
-            "fieldtype": "Password",
-            "label": "Private Key ID"
-        },
-        {
-            "fieldname": "client_id",
-            "fieldtype": "Data",
-            "label": "Client ID"
-        },
-        {
-            "fieldname": "auth_uri",
-            "fieldtype": "Data",
-            "label": "auth_uri"
-        },
-        {
-            "fieldname": "token_uri",
-            "fieldtype": "Data",
-            "label": "token_uri"
-        },
-        {
-            "fieldname": "auth_provider_x509_cert_url",
-            "fieldtype": "Data",
-            "label": "auth_provider_x509_cert_url"
-        },
-        {
-            "fieldname": "client_x509_cert_url",
-            "fieldtype": "Data",
-            "label": "client_x509_cert_url"
-        },
-        {
-            "fieldname": "service_account_json",
-            "fieldtype": "Attach",
-            "label": "Service Account"
         }
     ],
     "index_web_pages_for_search": 1,
     "istable": 1,
     "links": [],
-    "modified": "2025-08-03 21:25:00.039116",
+    "modified": "2026-07-25 10:56:00.000000",
     "modified_by": "Administrator",
     "module": "Royal Mobile App",
     "name": "FCM App Configuration",

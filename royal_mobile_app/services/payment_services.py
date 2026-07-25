@@ -8,10 +8,20 @@ import uuid
 
 class PaymentService:
     def __init__(self):
-        self.api_url = "https://api.waafipay.net/asm"
-        self.api_key = "API-1221796037AHX"
-        self.api_user_id = "1007359"
-        self.merchant_uid = "M0913615"
+        settings = frappe.get_single("Mobile Integrations Settings")
+        self.api_url = (settings.waafi_api_url or "").strip() or "https://api.waafipay.net/asm"
+        self.merchant_uid = (settings.waafi_merchant_uid or "").strip()
+        self.api_user_id = (settings.waafi_api_user_id or "").strip()
+        try:
+            self.api_key = settings.get_password("waafi_api_key") or ""
+        except Exception:
+            self.api_key = ""
+
+        if not self.merchant_uid or not self.api_user_id or not self.api_key:
+            frappe.throw(
+                "Waafi payment credentials are not configured. "
+                "Set them in Mobile Integrations Settings."
+            )
 
     def initiate_payment(self, mobile, amount, reference_id, invoice_id, description):
         """

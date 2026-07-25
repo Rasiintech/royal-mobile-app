@@ -49,7 +49,7 @@ class FCMService:
         # Debug Firebase Admin SDK on initialization
         # debug_firebase_admin()
         
-        self.settings = frappe.get_single("App Notification Settings")
+        self.settings = frappe.get_single("Mobile Integrations Settings")
         self.app_name = app_name
         self.fcm_config = self._get_specific_config()
         self.app = self._initialize_firebase_app()
@@ -67,7 +67,7 @@ class FCMService:
     def _get_specific_config(self) -> Dict:
         """Get configuration for specified app or default active"""
         if not self.settings.push_enabled:
-            frappe.throw("Push notifications are disabled in settings")
+            frappe.throw("Push notifications are disabled in Mobile Integrations Settings")
             
         if self.app_name:
             for config in self.settings.fcm_configurations:

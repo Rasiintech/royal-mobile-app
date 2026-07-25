@@ -94,7 +94,8 @@ class NotificationService:
                 refid=doc_dict.get("name")
             )
             return {
-                "success": True,
+                "success": bool(result.get("success")),
+                "message": result.get("message"),
                 "recipients": 1,
                 "result": result
             }
@@ -111,7 +112,7 @@ class NotificationService:
         """Handle bulk SMS sending with proper result formatting"""
         try:
             results = self.sms.send_bulk_sms_individual(messages)
-            success_count = sum(1 for r in results if r.get("status") == "success")
+            success_count = sum(1 for r in results if r.get("success"))
             
             return {
                 "success": success_count > 0,

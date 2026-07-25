@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-25 10:56:00.000000",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "hormuud_tab",
+  "hormuud_section",
+  "hormuud_username",
+  "hormuud_password",
+  "column_break_hormuud",
+  "hormuud_sender_id",
+  "hormuud_api_url",
+  "sms_character_limit",
+  "waafi_tab",
+  "waafi_section",
+  "waafi_api_url",
+  "waafi_merchant_uid",
+  "column_break_waafi",
+  "waafi_api_user_id",
+  "waafi_api_key",
+  "fcm_tab",
+  "fcm_section",
+  "push_enabled",
+  "fcm_configurations"
+ ],
+ "fields": [
+  {
+   "fieldname": "hormuud_tab",
+   "fieldtype": "Tab Break",
+   "label": "Hormuud SMS"
+  },
+  {
+   "fieldname": "hormuud_section",
+   "fieldtype": "Section Break",
+   "label": "Hormuud Credentials"
+  },
+  {
+   "fieldname": "hormuud_username",
+   "fieldtype": "Data",
+   "label": "Hormuud Username"
+  },
+  {
+   "fieldname": "hormuud_password",
+   "fieldtype": "Password",
+   "label": "Hormuud Password"
+  },
+  {
+   "fieldname": "column_break_hormuud",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hormuud_sender_id",
+   "fieldtype": "Data",
+   "label": "SMS Sender ID"
+  },
+  {
+   "default": "https://smsapi.hormuud.com",
+   "fieldname": "hormuud_api_url",
+   "fieldtype": "Data",
+   "label": "Hormuud API URL"
+  },
+  {
+   "default": "150",
+   "fieldname": "sms_character_limit",
+   "fieldtype": "Int",
+   "label": "SMS Character Limit"
+  },
+  {
+   "fieldname": "waafi_tab",
+   "fieldtype": "Tab Break",
+   "label": "Waafi Payment"
+  },
+  {
+   "fieldname": "waafi_section",
+   "fieldtype": "Section Break",
+   "label": "Waafi Credentials"
+  },
+  {
+   "default": "https://api.waafipay.net/asm",
+   "fieldname": "waafi_api_url",
+   "fieldtype": "Data",
+   "label": "Waafi API URL"
+  },
+  {
+   "fieldname": "waafi_merchant_uid",
+   "fieldtype": "Data",
+   "label": "Merchant UID"
+  },
+  {
+   "fieldname": "column_break_waafi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "waafi_api_user_id",
+   "fieldtype": "Data",
+   "label": "API User ID"
+  },
+  {
+   "fieldname": "waafi_api_key",
+   "fieldtype": "Password",
+   "label": "API Key"
+  },
+  {
+   "fieldname": "fcm_tab",
+   "fieldtype": "Tab Break",
+   "label": "FCM Push"
+  },
+  {
+   "fieldname": "fcm_section",
+   "fieldtype": "Section Break",
+   "label": "Firebase Push"
+  },
+  {
+   "default": "1",
+   "fieldname": "push_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Push Notifications"
+  },
+  {
+   "depends_on": "eval:doc.push_enabled",
+   "fieldname": "fcm_configurations",
+   "fieldtype": "Table",
+   "label": "FCM App Configurations",
+   "options": "FCM App Configuration"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-25 10:56:00.000000",
+ "modified_by": "Administrator",
+ "module": "Royal Mobile App",
+ "name": "Mobile Integrations Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

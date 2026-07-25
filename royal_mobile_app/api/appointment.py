@@ -7,6 +7,7 @@ from royal_mobile_app.utils.trace_utils import (
 )
 from datetime import datetime
 from royal_mobile_app.utils.erpnext_utils import get_mobile_app_defaults
+from royal_mobile_app.utils.phone_utils import mobile_variants, normalize_somali_mobile
 
 
 def _count_que_appointments_for_doctor_on_date(practitioner, appointment_date):
@@ -464,13 +465,28 @@ def get_appointments(mobile_no=None):
             "msg": "Mobile No is required."
         }
 
+    canonical = normalize_somali_mobile(mobile_no)
+    if not canonical:
+        log_mobile_api_failure(
+            api=api,
+            step="invalid_mobile",
+            context={"mobile_no": mobile_no},
+            http_status_code=400,
+        )
+        frappe.response['http_status_code'] = 400
+        return {
+            "status": "error",
+            "msg": "Invalid mobile number format."
+        }
+
     try:
+        variants = mobile_variants(canonical)
         with run_as_administrator_if_guest():
             cutoff_date = frappe.utils.add_days(frappe.utils.today(), -90)
 
             appointments = frappe.get_all(
                 "Que",
-                filters={"mobile": mobile_no, "docstatus": ["<", 2], "date": [">=", cutoff_date]},
+                filters={"mobile": ["in", variants], "docstatus": ["<", 2], "date": [">=", cutoff_date]},
                 fields=["name", "patient", "patient_name", "practitioner", "paid_amount", "date",
                         "appointment_source", "token_no"],
                 order_by="date desc"
@@ -480,13 +496,13 @@ def get_appointments(mobile_no=None):
                 log_mobile_api_failure(
                     api=api,
                     step="no_appointments_found",
-                    context={"mobile_no": mobile_no},
+                    context={"mobile_no": canonical},
                     http_status_code=404,
                 )
                 frappe.response['http_status_code'] = 404
                 return {
                     "status": "error",
-                    "msg": f"No appointments found for patient: {mobile_no}",
+                    "msg": f"No appointments found for patient: {canonical}",
                     "Data": None
                 }
 

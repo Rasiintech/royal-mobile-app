@@ -1,5 +1,6 @@
 import frappe
 from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
+from royal_mobile_app.utils.phone_utils import mobile_variants, normalize_somali_mobile
 from royal_mobile_app.utils.response_utils import response_util
 
 
@@ -12,8 +13,20 @@ def can_register_patient(full_name, mobile_number):
             http_status_code=400
         )
 
+    canonical = normalize_somali_mobile(mobile_number)
+    if not canonical:
+        return response_util(
+            status="error",
+            message="Invalid mobile number format.",
+            http_status_code=400
+        )
+
+    variants = mobile_variants(canonical)
     with run_as_administrator_if_guest():
-        exists = frappe.db.exists("Patient", {"mobile_no": mobile_number,"first_name" : full_name})
+        exists = frappe.db.exists(
+            "Patient",
+            {"mobile_no": ["in", variants], "first_name": full_name},
+        )
     if exists:
         return response_util(
             status="error",
@@ -28,7 +41,7 @@ def can_register_patient(full_name, mobile_number):
             data={"otp_sent": True},
             http_status_code=200
         )
-        
+
 
 @frappe.whitelist(allow_guest=True)
 def patient_login(mobile_number):
@@ -39,11 +52,20 @@ def patient_login(mobile_number):
             http_status_code=400
         )
 
+    canonical = normalize_somali_mobile(mobile_number)
+    if not canonical:
+        return response_util(
+            status="error",
+            message="Invalid mobile number format.",
+            http_status_code=400
+        )
+
     try:
+        variants = mobile_variants(canonical)
         with run_as_administrator_if_guest():
             patient = frappe.get_value(
                 "Patient",
-                {"mobile_no": mobile_number},
+                {"mobile_no": ["in", variants]},
                 "name",
                 order_by="creation asc"
             )
@@ -81,7 +103,7 @@ def patient_login(mobile_number):
             error=e,
             http_status_code=500
         )
-        
+
 
 @frappe.whitelist(allow_guest=True)
 def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobile_number, pat_district):
@@ -93,14 +115,33 @@ def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobil
                 http_status_code=400
             )
 
+        canonical = normalize_somali_mobile(pat_mobile_number)
+        if not canonical:
+            return response_util(
+                status="error",
+                message="Invalid mobile number format.",
+                http_status_code=400
+            )
+
+        variants = mobile_variants(canonical)
         with run_as_administrator_if_guest():
+            if frappe.db.exists(
+                "Patient",
+                {"mobile_no": ["in", variants], "first_name": pat_full_name},
+            ):
+                return response_util(
+                    status="error",
+                    message="This patient already exists.",
+                    http_status_code=409
+                )
+
             create_doc = frappe.new_doc("Patient")
 
             create_doc.first_name = pat_full_name
             create_doc.sex = pat_gender
             create_doc.p_age = pat_age
             create_doc.age_type = pat_age_type
-            create_doc.mobile_no = pat_mobile_number
+            create_doc.mobile_no = canonical
             create_doc.territory = pat_district
             create_doc.how_did_you_hear_about_our_hospital = "Social Media"
             create_doc.insert()
@@ -127,7 +168,7 @@ def register_patient(pat_full_name, pat_gender, pat_age, pat_age_type, pat_mobil
             error=e,
             http_status_code=500
         )
-          
+
 
 @frappe.whitelist(allow_guest=True)
 def get_patients_with_same_mobile(mobile_number, doctor_name=None):
@@ -138,11 +179,20 @@ def get_patients_with_same_mobile(mobile_number, doctor_name=None):
             http_status_code=400
         )
 
+    canonical = normalize_somali_mobile(mobile_number)
+    if not canonical:
+        return response_util(
+            status="error",
+            message="Invalid mobile number format.",
+            http_status_code=400
+        )
+
     try:
+        variants = mobile_variants(canonical)
         with run_as_administrator_if_guest():
             patients = frappe.get_all(
                 "Patient",
-                filters={"mobile_no": mobile_number},
+                filters={"mobile_no": ["in", variants]},
                 fields=[
                     "name", "first_name", "p_age", "image",
                     "customer_group", "creation"

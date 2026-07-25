@@ -2,7 +2,11 @@ import frappe
 import re
 from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
 from royal_mobile_app.utils.response_utils import response_util
-from royal_mobile_app.utils.erpnext_utils import get_mobile_app_defaults
+from royal_mobile_app.utils.erpnext_utils import (
+    apply_payment_gateway_fee,
+    get_mobile_app_defaults,
+)
+from royal_mobile_app.utils.phone_utils import mobile_variants, normalize_somali_mobile
 from royal_mobile_app.utils.trace_utils import log_mobile_api_failure, order_trace_context
 
 
@@ -306,25 +310,37 @@ def get_sales_orders_by_mobile(mobile=None):
 
         # Temporary always return empty list
         # Reason : the hospital disabled the order feature in the mobile app
-        return response_util(
-            status="success",
-            message="Sales Orders retrieved successfully",
-            data=[],
-            http_status_code=200,
-        )
+        # return response_util(
+        #     status="success",
+        #     message="Sales Orders retrieved successfully",
+        #     data=[],
+        #     http_status_code=200, 
+        # )
+
+        canonical = normalize_somali_mobile(mobile)
+        if not canonical:
+            return _order_error(
+                api,
+                "invalid_mobile",
+                mobile=mobile,
+                message="Invalid mobile number format.",
+                http_status_code=400,
+            )
+
+        variants = mobile_variants(canonical)
 
         with run_as_administrator_if_guest():
             patient_records = frappe.get_all(
                 "Patient",
-                filters={"mobile": mobile},
+                filters={"mobile": ["in", variants]},
                 fields=["name", "patient_name"],
             )
             if not patient_records:
                 return _order_error(
                     api,
                     "no_patients_found",
-                    mobile=mobile,
-                    message=f"No patients found for mobile: {mobile}",
+                    mobile=canonical,
+                    message=f"No patients found for mobile: {canonical}",
                     data=[],
                     http_status_code=404,
                 )
@@ -351,6 +367,7 @@ def get_sales_orders_by_mobile(mobile=None):
                     fields=["item_code", "item_name", "qty", "rate", "amount"],
                 )
                 so["patient_name"] = patient_name_map.get(so["patient"], "")
+                so["grand_total"] = apply_payment_gateway_fee(so.get("grand_total"))
 
             return response_util(
                 status="success",

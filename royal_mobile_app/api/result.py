@@ -1,6 +1,7 @@
 import frappe
 import re
 from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
+from royal_mobile_app.utils.phone_utils import mobile_variants, normalize_somali_mobile
 from royal_mobile_app.utils.response_utils import response_util
 
 def clean_html(raw_html):
@@ -19,17 +20,26 @@ def get_lab_results_by_mobile(mobile=None):
                 http_status_code=400
             )
 
+        canonical = normalize_somali_mobile(mobile)
+        if not canonical:
+            return response_util(
+                status="error",
+                message="Invalid mobile number format.",
+                http_status_code=400
+            )
+
+        variants = mobile_variants(canonical)
         with run_as_administrator_if_guest():
             patient_records = frappe.get_all(
                 "Patient",
-                filters={"mobile": mobile},
+                filters={"mobile": ["in", variants]},
                 fields=["name", "patient_name"]
             )
 
             if not patient_records:
                 return response_util(
                     status="error",
-                    message=f"No patients found for mobile: {mobile}",
+                    message=f"No patients found for mobile: {canonical}",
                     data=[],
                     http_status_code=404
                 )

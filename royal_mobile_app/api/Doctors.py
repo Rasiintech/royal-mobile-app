@@ -1,7 +1,21 @@
 import frappe
 from royal_mobile_app.utils.guest_api_utils import run_as_administrator_if_guest
 from royal_mobile_app.utils.response_utils import response_util
-import time
+from royal_mobile_app.utils.erpnext_utils import (
+    get_mobile_app_defaults,
+    get_mobile_consultation_charge,
+)
+
+
+def _apply_mobile_consultation_charge(doctors, defaults=None):
+    """Overwrite each doctor's op_consulting_charge with mobile-adjusted total."""
+    defaults = defaults or get_mobile_app_defaults()
+    for doctor in doctors:
+        doctor["op_consulting_charge"] = get_mobile_consultation_charge(
+            doctor.get("op_consulting_charge"),
+            defaults,
+        )
+    return doctors
 
 
 @frappe.whitelist(allow_guest=True)
@@ -38,6 +52,9 @@ def get_all_doctors():
                     http_status_code=404
                 )
 
+            defaults = get_mobile_app_defaults()
+            _apply_mobile_consultation_charge(doctors, defaults)
+
             return response_util(
                 status="success",
                 message="Doctors fetched successfully",
@@ -54,7 +71,7 @@ def get_all_doctors():
             data=None,
             http_status_code=500
         )
-    
+
 @frappe.whitelist(allow_guest=True)
 def get_doctors_by_department(department):
     try:
@@ -76,6 +93,9 @@ def get_doctors_by_department(department):
                     "msg": "No doctors found in the system.",
                     "Data": None
                 }
+
+            defaults = get_mobile_app_defaults()
+            _apply_mobile_consultation_charge(doctors, defaults)
 
             frappe.response['http_status_code'] = 200
             return {
