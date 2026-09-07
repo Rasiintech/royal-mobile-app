@@ -11,10 +11,15 @@ from royal_mobile_app.utils.phone_utils import mobile_variants, normalize_somali
 
 
 def _count_que_appointments_for_doctor_on_date(practitioner, appointment_date):
-    """Active Que rows (not cancelled) for this practitioner on this date (any source)."""
+    """Active Que rows (not cancelled) for this practitioner on this date from Mobile App."""
     return frappe.db.count(
         "Que",
-        {"practitioner": practitioner, "date": appointment_date, "docstatus": ["<", 2]},
+        {
+            "practitioner": practitioner,
+            "date": appointment_date,
+            "docstatus": ["<", 2],
+            # "appointment_source": "Mobile App",
+        },
     )
 
 
@@ -38,6 +43,7 @@ def _appointment_error(api, step, PID, doctor_practitioner, appointment_date, **
         api=api,
         step=step,
         context=appointment_trace_context(PID, doctor_practitioner, appointment_date),
+        message=kwargs.get("message"),
         error=kwargs.get("error"),
         http_status_code=kwargs.get("http_status_code"),
     )
@@ -60,6 +66,10 @@ def _doctor_daily_limit_error(api, defaults, practitioner, appointment_date, PID
         return None
     current = _count_que_appointments_for_doctor_on_date(practitioner, appointment_date)
     if current >= limit:
+        msg = (
+            "This doctor has reached the daily appointment limit for this date. "
+            "Please choose another date or doctor."
+        )
         log_mobile_api_failure(
             api=api,
             step="doctor_daily_limit",
@@ -71,14 +81,12 @@ def _doctor_daily_limit_error(api, defaults, practitioner, appointment_date, PID
                 effective_limit=limit,
                 limit_source=limit_source,
             ),
+            message=msg,
             http_status_code=400,
         )
         return response_util(
             status="error",
-            message=(
-                "This doctor has reached the daily appointment limit for this date. "
-                "Please choose another date or doctor."
-            ),
+            message=msg,
             http_status_code=400,
         )
     return None
@@ -284,30 +292,34 @@ def validate_appointment_booking(PID, doctor_practitioner, appointment_date):
             )
 
     except frappe.ValidationError as ve:
+        msg = "Validation failed during appointment simulation."
         log_mobile_api_failure(
             api=api,
             step="que_validation_error",
             context=appointment_trace_context(PID, doctor_practitioner, appointment_date),
+            message=msg,
             error=ve,
             http_status_code=400,
         )
         return response_util(
             status="error",
-            message="Validation failed during appointment simulation.",
+            message=msg,
             error=str(ve),
             http_status_code=400,
         )
     except Exception as e:
+        msg = "Unexpected error while validating appointment booking."
         log_mobile_api_failure(
             api=api,
             step="unexpected_error",
             context=appointment_trace_context(PID, doctor_practitioner, appointment_date),
+            message=msg,
             error=e,
             http_status_code=500,
         )
         return response_util(
             status="error",
-            message="Unexpected error while validating appointment booking.",
+            message=msg,
             error=str(e),
             http_status_code=500,
         )
@@ -432,16 +444,18 @@ def create_appointment(PID, doctor_practitioner, appointment_date):
             )
 
     except Exception as e:
+        msg = "An error occurred while creating the appointment."
         log_mobile_api_failure(
             api=api,
             step="unexpected_error",
             context=appointment_trace_context(PID, doctor_practitioner, appointment_date),
+            message=msg,
             error=e,
             http_status_code=500,
         )
         return response_util(
             status="error",
-            message="An error occurred while creating the appointment.",
+            message=msg,
             error=str(e),
             data=None,
             http_status_code=500,
@@ -453,30 +467,34 @@ def get_appointments(mobile_no=None):
     api = "get_appointments"
 
     if not mobile_no:
+        msg = "Mobile No is required."
         log_mobile_api_failure(
             api=api,
             step="missing_mobile",
             context={"mobile_no": mobile_no},
+            message=msg,
             http_status_code=400,
         )
         frappe.response['http_status_code'] = 400
         return {
             "status": "error",
-            "msg": "Mobile No is required."
+            "msg": msg,
         }
 
     canonical = normalize_somali_mobile(mobile_no)
     if not canonical:
+        msg = "Invalid mobile number format."
         log_mobile_api_failure(
             api=api,
             step="invalid_mobile",
             context={"mobile_no": mobile_no},
+            message=msg,
             http_status_code=400,
         )
         frappe.response['http_status_code'] = 400
         return {
             "status": "error",
-            "msg": "Invalid mobile number format."
+            "msg": msg,
         }
 
     try:
@@ -493,16 +511,18 @@ def get_appointments(mobile_no=None):
             )
 
             if not appointments:
+                msg = f"No appointments found for patient: {canonical}"
                 log_mobile_api_failure(
                     api=api,
                     step="no_appointments_found",
                     context={"mobile_no": canonical},
+                    message=msg,
                     http_status_code=404,
                 )
                 frappe.response['http_status_code'] = 404
                 return {
                     "status": "error",
-                    "msg": f"No appointments found for patient: {canonical}",
+                    "msg": msg,
                     "Data": None
                 }
 
@@ -514,16 +534,18 @@ def get_appointments(mobile_no=None):
             }
 
     except Exception as e:
+        msg = "An error occurred while retrieving appointments."
         log_mobile_api_failure(
             api=api,
             step="unexpected_error",
             context={"mobile_no": mobile_no},
+            message=msg,
             error=e,
             http_status_code=500,
         )
         frappe.response['http_status_code'] = 500
         return {
             "status": "error",
-            "msg": "An error occurred while retrieving appointments.",
+            "msg": msg,
             "details": str(e)
         }

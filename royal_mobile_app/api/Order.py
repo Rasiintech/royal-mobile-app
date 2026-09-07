@@ -16,6 +16,7 @@ def _order_error(api, step, sales_order_id=None, so_doc=None, mobile=None, **kwa
         api=api,
         step=step,
         context=order_trace_context(sales_order_id=sales_order_id, so_doc=so_doc, mobile=mobile),
+        message=kwargs.get("message"),
         error=kwargs.get("error"),
         http_status_code=kwargs.get("http_status_code"),
     )
@@ -38,16 +39,23 @@ def _handle_credit_limit_error(api, step, sales_order_id, so_doc, message):
     else:
         approvers = emails or ["Credit approvers not found in message."]
 
+    user_msg = "Customer's credit limit has been exceeded. Approval is required before proceeding."
     log_mobile_api_failure(
         api=api,
         step=step,
-        context=order_trace_context(sales_order_id=sales_order_id, so_doc=so_doc),
+        context=order_trace_context(
+            sales_order_id=sales_order_id,
+            so_doc=so_doc,
+            customer=getattr(so_doc, "customer", None) if so_doc else None,
+            patient=getattr(so_doc, "patient", None) if so_doc else None,
+        ),
+        message=user_msg,
         error=message,
         http_status_code=400,
     )
     return response_util(
         status="error",
-        message="Customer's credit limit has been exceeded. Approval is required before proceeding.",
+        message=user_msg,
         data=approvers,
         error=message,
         http_status_code=400,
@@ -121,7 +129,7 @@ def validate_sales_order_for_conversion(sales_order_id=None):
             "validation_error",
             sales_order_id=sales_order_id,
             so_doc=so_doc,
-            message="Validation error occurred while submitting Sales Invoice.",
+            message=message,
             error=message,
             http_status_code=400,
         )
@@ -136,16 +144,18 @@ def validate_sales_order_for_conversion(sales_order_id=None):
         )
 
     except Exception as e:
+        msg = "Unexpected error while validating Sales Order for conversion."
         log_mobile_api_failure(
             api=api,
             step="unexpected_error",
             context=order_trace_context(sales_order_id=sales_order_id, so_doc=so_doc),
+            message=msg,
             error=e,
             http_status_code=500,
         )
         return response_util(
             status="error",
-            message="Unexpected error while converting Sales Order to Sales Invoice.",
+            message=msg,
             error=str(e),
             http_status_code=500,
         )
@@ -265,7 +275,7 @@ def convert_sales_order_to_invoice(sales_order_id=None):
             "validation_error",
             sales_order_id=sales_order_id,
             so_doc=so_doc,
-            message="Validation error occurred while submitting Sales Invoice.",
+            message=message,
             error=message,
             http_status_code=400,
         )
@@ -280,16 +290,18 @@ def convert_sales_order_to_invoice(sales_order_id=None):
         )
 
     except Exception as e:
+        msg = "Unexpected error while converting Sales Order to Sales Invoice."
         log_mobile_api_failure(
             api=api,
             step="unexpected_error",
             context=order_trace_context(sales_order_id=sales_order_id, so_doc=so_doc),
+            message=msg,
             error=e,
             http_status_code=500,
         )
         return response_util(
             status="error",
-            message="Unexpected error while converting Sales Order to Sales Invoice.",
+            message=msg,
             error=str(e),
             http_status_code=500,
         )
@@ -377,16 +389,18 @@ def get_sales_orders_by_mobile(mobile=None):
             )
 
     except Exception as e:
+        msg = "An error occurred while retrieving sales orders."
         log_mobile_api_failure(
             api=api,
             step="unexpected_error",
             context=order_trace_context(mobile=mobile),
+            message=msg,
             error=e,
             http_status_code=500,
         )
         return response_util(
             status="error",
-            message="Internal Server Error",
+            message=msg,
             error=str(e),
             http_status_code=500,
         )
